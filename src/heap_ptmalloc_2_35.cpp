@@ -831,6 +831,8 @@ static void add_ca_heap(struct ca_arena* arena, struct ca_heap* heap)
 static struct ca_arena* alloc_ca_arena(void)
 {
 	struct ca_arena* arena;
+	int i;
+	struct ca_heap* heap;
 
 	if (g_arena_cnt >= g_arena_buf_sz)
 	{
@@ -839,6 +841,13 @@ static struct ca_arena* alloc_ca_arena(void)
 		else
 			g_arena_buf_sz *= 2;
 		g_arenas = (struct ca_arena*) realloc(g_arenas, sizeof(struct ca_arena)*g_arena_buf_sz);
+		for (i = 0; i < g_arena_cnt; ++i)
+		{
+			for (heap = g_arenas[i].mpHeap; heap != NULL; heap = heap->mpNext)
+			{
+				heap->mArena = &g_arenas[i];
+			}
+		}
 	}
 	arena = &g_arenas[g_arena_cnt++];
 	memset(arena, 0, sizeof(struct ca_arena));
